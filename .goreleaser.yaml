@@ -25,6 +25,21 @@ archives:
         formats:
           - zip
 
+brews:
+  - name: mkcr
+    repository:
+      owner: eimarfandino
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_GITHUB_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/eimarfandino/snow-cr-cli"
+    description: "Create and list ServiceNow Standard Change requests without touching the UI"
+    license: "MIT"
+    install: |
+      bin.install "mkcr"
+    test: |
+      system "#{bin}/mkcr", "--help"
+
 changelog:
   sort: asc
   filters:
