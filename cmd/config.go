@@ -14,6 +14,7 @@ type Config struct {
 	SNInstance      string `json:"sn_instance"`
 	StdTemplateID   string `json:"std_template_id"`
 	CmdbCI          string `json:"cmdb_ci"`
+	CmdbCISysID     string `json:"cmdb_ci_sys_id"`
 	AssignmentGroup string `json:"assignment_group"`
 	AssignedTo      string `json:"assigned_to"`
 }
@@ -56,6 +57,7 @@ var configCmd = &cobra.Command{
 			SNInstance:      "now.example-instance.com",
 			StdTemplateID:   "REDACTED_TEMPLATE_ID",
 			CmdbCI:          "Kubernetes Platform [Production]",
+			CmdbCISysID:     "REDACTED_CI_SYSID",
 			AssignmentGroup: "AWS ENABLEMENT",
 		}
 
@@ -79,9 +81,14 @@ var configCmd = &cobra.Command{
 		}, &answers.StdTemplateID))
 
 		must(survey.AskOne(&survey.Input{
-			Message: "Configuration item (cmdb_ci):",
+			Message: "Configuration item (cmdb_ci display name):",
 			Default: defaults.CmdbCI,
 		}, &answers.CmdbCI))
+
+		must(survey.AskOne(&survey.Input{
+			Message: "Configuration item sys_id (find it in the URL when opening the CI in ServiceNow):",
+			Default: defaults.CmdbCISysID,
+		}, &answers.CmdbCISysID))
 
 		must(survey.AskOne(&survey.Input{
 			Message: "Assignment group:",
