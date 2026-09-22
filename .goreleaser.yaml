@@ -32,7 +32,7 @@ brews:
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_GITHUB_TOKEN }}"
     directory: Formula
-    homepage: "https://github.com/eimarfandino/snow-cr-cli"
+    homepage: "https://github.com/eimarfandino/snow-cli"
     description: "Create and list ServiceNow Standard Change requests without touching the UI"
     license: "MIT"
     install: |

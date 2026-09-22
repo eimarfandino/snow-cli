@@ -53,13 +53,7 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Set up mkcr — required before login or create",
 	Run: func(cmd *cobra.Command, args []string) {
-		defaults := Config{
-			SNInstance:      "now.example-instance.com",
-			StdTemplateID:   "REDACTED_TEMPLATE_ID",
-			CmdbCI:          "Kubernetes Platform [Production]",
-			CmdbCISysID:     "REDACTED_CI_SYSID",
-			AssignmentGroup: "AWS ENABLEMENT",
-		}
+		defaults := Config{}
 
 		// Load existing config as defaults if already set up, so re-running config edits instead of resetting
 		if configExists() {

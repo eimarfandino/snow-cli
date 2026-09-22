@@ -138,8 +138,9 @@ func fetchAuth() (cookieHeader, userToken string, err error) {
 		return "", "", err
 	}
 	var parts []string
+	instanceHost := appConfig.SNInstance
 	for _, c := range cookies {
-		if strings.Contains(c.Domain, "example.com") {
+		if strings.Contains(c.Domain, instanceHost) || strings.Contains(instanceHost, c.Domain) {
 			parts = append(parts, fmt.Sprintf("%s=%s", c.Name, c.Value))
 		}
 	}
