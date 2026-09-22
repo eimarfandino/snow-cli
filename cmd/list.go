@@ -81,13 +81,39 @@ func resolveStates(flag string) ([]string, error) {
 	return codes, nil
 }
 
+// snField handles ServiceNow fields that may come back as either a plain string
+// (when sysparm_display_value=true for scalar fields) or an object with a
+// display_value key (for reference fields like assigned_to).
+type snField struct {
+	s string
+}
+
+func (f *snField) UnmarshalJSON(b []byte) error {
+	// try plain string first
+	var s string
+	if err := json.Unmarshal(b, &s); err == nil {
+		f.s = s
+		return nil
+	}
+	// fall back to {"display_value": "..."}
+	var obj struct {
+		DisplayValue string `json:"display_value"`
+	}
+	if err := json.Unmarshal(b, &obj); err != nil {
+		return err
+	}
+	f.s = obj.DisplayValue
+	return nil
+}
+
 type changeRecord struct {
-	Number      string `json:"number"`
-	SysID       string `json:"sys_id"`
-	State       string `json:"state"`
-	Description string `json:"description"`
-	StartDate   string `json:"start_date"`
-	EndDate     string `json:"end_date"`
+	Number      string  `json:"number"`
+	SysID       string  `json:"sys_id"`
+	State       string  `json:"state"`
+	Description string  `json:"description"`
+	StartDate   string  `json:"start_date"`
+	EndDate     string  `json:"end_date"`
+	AssignedTo  snField `json:"assigned_to"`
 }
 
 // lookupSysID and the cmdb_ci table lookup are intentionally removed.
@@ -126,7 +152,7 @@ func listChanges(cookieHeader, userToken string, states []string, debug bool) {
 		"https://%s/api/now/table/change_request?sysparm_query=%s&sysparm_fields=%s&sysparm_display_value=true&sysparm_limit=50",
 		appConfig.SNInstance,
 		url.QueryEscape(query+"^ORDERBYDESCstart_date"),
-		"number,sys_id,state,description,start_date,end_date",
+		"number,sys_id,state,description,start_date,end_date,assigned_to",
 	)
 
 	if debug {
@@ -174,13 +200,14 @@ func listChanges(cookieHeader, userToken string, states []string, debug bool) {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "NUMBER\tSTATE\tSTART DATE\tEND DATE\tDESCRIPTION\tURL")
-	fmt.Fprintln(w, "------\t-----\t----------\t--------\t-----------\t---")
+	fmt.Fprintln(w, "NUMBER\tSTATE\tASSIGNED TO\tSTART DATE\tEND DATE\tDESCRIPTION\tURL")
+	fmt.Fprintln(w, "------\t-----\t-----------\t----------\t--------\t-----------\t---")
 	for _, cr := range parsed.Result {
 		url := fmt.Sprintf("https://%s/nav_to.do?uri=change_request.do%%3Fsys_id%%3D%s", appConfig.SNInstance, cr.SysID)
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
 			cr.Number,
 			cr.State,
+			cr.AssignedTo.s,
 			cr.StartDate,
 			cr.EndDate,
 			truncate(cr.Description, 40),
