@@ -22,7 +22,7 @@ Download the latest binary for your platform from the [releases page](../../rele
 ```bash
 git clone https://github.com/eimarfandino/snow-cli.git
 cd snow-cli
-go build -o mkcr .
+make build
 ```
 
 ## Quick start
@@ -112,13 +112,55 @@ CHG0000002  New    18-09-2026 14:00:00   18-09-2026 15:00:00   Rotate TLS certif
 | `--state` | Filter by one or more states, comma-separated |
 | `--debug` | Print the raw API request URL and response body |
 
-Valid state values: `new`, `assess`, `authorize`, `scheduled`, `implement`, `review`, `closed`, `cancelled`.
+Valid states: `new`, `assess`, `authorize`, `scheduled`, `implement`, `review`, `closed`, `cancelled`.
 
 ```bash
 mkcr list --state scheduled
 mkcr list --state new,scheduled
 mkcr list --debug
 ```
+
+### `mkcr attachments`
+
+Manage files attached to a Change Request.
+
+#### `mkcr attachments list`
+
+```bash
+mkcr attachments list --cr-id CHG0000001
+```
+
+Also accepts a raw sys_id:
+
+```bash
+mkcr attachments list --cr-id 48f9f2b43b570f5472b796c964e45a21
+```
+
+```
+FILE NAME              DOWNLOAD
+---------              --------
+runbook.pdf            https://yourcompany.service-now.com/api/now/attachment/...
+screenshot.png         https://yourcompany.service-now.com/api/now/attachment/...
+```
+
+#### `mkcr attachments upload`
+
+```bash
+mkcr attachments upload --cr-id CHG0000001 --file ./runbook.pdf
+```
+
+On success, prints the file name and download link:
+
+```
+Uploaded: runbook.pdf
+https://yourcompany.service-now.com/api/now/attachment/...
+```
+
+| Flag | Command | Description |
+|---|---|---|
+| `--cr-id` | both | CR number (e.g. `CHG0000001`) or raw sys_id (required) |
+| `--file` | upload | Path to the file to upload (required) |
+| `--debug` | both | Print the raw API request URL and response body |
 
 ## How it works
 
